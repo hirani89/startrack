@@ -78,7 +78,7 @@ class Startrack {
 	 */
 	public function getQuotes($input): array
 	{
-		$this->sendPostRequest('prices/items', $input);
+		$this->sendPostRequest('prices/shipments', $input);
 		$data = $this->convertResponse($this->getResponse()->data);
 		$this->closeSocket();
 
