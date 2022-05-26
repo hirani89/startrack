@@ -1,0 +1,20 @@
+{
+    "name": "zoet/startrack",
+    "type": "library",
+    "description": "StarTrack API",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Bhavesh Hirani",
+            "email": "bhavesh@zoet.com.au"
+        }
+    ],
+    "require": {
+        "php": ">=7.2"
+    },
+    "autoload": {
+        "psr-4": {
+			"Zoet\\Startrack\\": "src/"
+		}
+    }
+}
