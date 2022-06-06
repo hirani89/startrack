@@ -121,7 +121,7 @@
 				}
 				$request['items'][] = $item;
 			}
-			return $this->_startrack->getQuotes(['shipments' => [$request]]);
+			return $this->_startrack->getQuotes(['shipments' => [$request]], $urgent);
 		}
 		
 		public function lodgeShipment()
