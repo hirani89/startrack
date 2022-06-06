@@ -79,7 +79,7 @@
 		 * @return Quote[]
 		 * @throws Exception
 		 */
-		public function getQuotes($input): array
+		public function getQuotes($input, $urgent): array
 		{
 			$this->sendPostRequest('prices/shipments', $input);
 			$data = $this->convertResponse($this->getResponse()->data);
@@ -98,7 +98,13 @@
 						throw new Exception($error['message']);
 					}
 				}
-				$quotes[$shipment['items'][0]['product_id']] = $shipment['shipment_summary']['total_cost'];
+				if($urgent && in_array($shipment['items'][0]['product_id'], ['FPP', 'PRM'])){
+					$quotes[$shipment['items'][0]['product_id']] = $shipment['shipment_summary']['total_cost'];
+				}
+				else if(!$urgent){
+					$quotes[$shipment['items'][0]['product_id']] = $shipment['shipment_summary']['total_cost'];
+				}
+				
 				$is_subsequent_item = true;
 			}
 			asort($quotes, 1);

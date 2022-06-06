@@ -87,7 +87,7 @@
 		 * @return \Zoet\Startrack\Quote[]
 		 * @throws \Exception
 		 */
-		public function getQuotes()
+		public function getQuotes($urgent = false)
 		{
 			$request = [
 				'from' => [
