@@ -166,6 +166,7 @@
 				'items' => [],
 			];
 			foreach ($this->parcels as $parcel) {
+				$parcel->product_id = $this->product_id;
 				$item = [
 					'item_reference' => $parcel->item_reference,
 					'product_id' => $this->product_id,
@@ -227,6 +228,10 @@
 		public function deleteShipment()
 		{
 			return $this->_startrack->deleteShipment($this->shipment_id);
+		}
+		public function deleteShipmentById($shipment_id)
+		{
+			return $this->_startrack->deleteShipment($shipment_id);
 		}
 		
 	}
