@@ -438,7 +438,7 @@
 						$headers[] = $line;
 					}
 				} else {
-					$data .= fread($this->socket, 4096);
+					$data .= fread($this->socket, 4096 * 8);
 				}
 			}
 			
