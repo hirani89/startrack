@@ -21,7 +21,7 @@
 		const LAYOUT_A4_TWO_PER_PAGE = 'A4-2pp';
 		const LAYOUT_A4_THREE_PER_PAGE = 'A4-3pp';
 		const LAYOUT_A4_FOUR_PER_PAGE = 'A4-4pp';
-		const LAYOUT_A6_ONE_PER_PAGE = 'A6-1PP';
+		const LAYOUT_A6_ONE_PER_PAGE = 'A6-1pp';
 		const LAYOUT_A6_THERMAL = 'THERMAL-LABEL-A6-1PP';
 		
 		const FORMAT_PDF = 'PDF';
