@@ -3,6 +3,7 @@
 	namespace Zoet\Startrack;
 	
 	use Exception;
+	use GuzzleHttp\Client;
 	
 	/**
 	 * Interact with the Australian Post API
@@ -17,13 +18,18 @@
 		private $api_password = null;
 		private $account_number = null;
 		private $test_mode = null;
+		private $client = null;
 		
-		const API_SCHEME = 'tls://';
+		const API_SCHEME = 'https://';
 		const API_HOST = 'digitalapi.auspost.com.au';
 		const API_PORT = 443;
 		const HEADER_EOL = "\r\n";
 		
 		private $socket; // socket for communicating to the API
+		/**
+		 * @var \stdClass
+		 */
+		private $response;
 		
 		/**
 		 *
@@ -38,6 +44,9 @@
 			$this->api_password = $api_password;
 			$this->account_number = $account_number;
 			$this->test_mode = $test_mode;
+			$this->client = new Client([
+				'base_uri' => self::API_SCHEME . self::API_HOST . $this->baseUrl()
+			]);
 		}
 		
 		/**
@@ -48,9 +57,12 @@
 		 */
 		public function getAccountDetails(): Account
 		{
-			$this->sendGetRequest('accounts/' . $this->account_number, [], false);
-			$data = $this->convertResponse($this->getResponse()->data);
-			$this->closeSocket();
+			$headers = $this->buildHttpHeaders('GET', 'accounts/');
+			$data = $this->client->request('GET', 'accounts/'. $this->account_number,['headers'=>$headers]);
+			
+//			$this->sendGetRequest('accounts/' . $this->account_number, [], false);
+//			$data = $this->convertResponse($this->getResponse()->data);
+//			$this->closeSocket();
 			
 			return new Account($data);
 		}
@@ -98,10 +110,9 @@
 						throw new Exception($error['message']);
 					}
 				}
-				if($urgent && in_array($shipment['items'][0]['product_id'], ['FPP', 'PRM'])){
+				if ($urgent && in_array($shipment['items'][0]['product_id'], ['FPP', 'PRM'])) {
 					$quotes[$shipment['items'][0]['product_id']] = $shipment['shipment_summary']['total_cost'];
-				}
-				else if(!$urgent){
+				} else if (!$urgent) {
 					$quotes[$shipment['items'][0]['product_id']] = $shipment['shipment_summary']['total_cost'];
 				}
 				
@@ -400,21 +411,13 @@
 			
 			$this->createSocket();
 			$headers = $this->buildHttpHeaders($type, $action, strlen($encoded_data), $include_account);
+			$data = $this->client->request($type, $action. $this->account_number,['json'=>$encoded_data,'headers'=>$headers]);
 			
-			if (fwrite(
-					$this->socket,
-					implode(self::HEADER_EOL, $headers) . self::HEADER_EOL . self::HEADER_EOL
-				) === false) {
-				throw new Exception('Could not write to Australia Post API');
-			}
+			$response = new \stdClass;
+			$response->headers = $data->getHeaders();
+			$response->data = $data->getBody();
 			
-			if ($data) {
-				if (fwrite($this->socket, $encoded_data) === false) {
-					throw new Exception('Could not write to Australia Post API');
-				}
-			}
-			
-			fflush($this->socket);
+			$this->response = $response;
 		}
 		
 		/**
@@ -424,29 +427,7 @@
 		 */
 		private function getResponse()
 		{
-			$headers = array();
-			$data = '';
-			$currently_reading_headers = true;
-			
-			while (!feof($this->socket)) {
-				if ($currently_reading_headers) {
-					$line = fgets($this->socket);
-					$line = trim($line);
-					if ($line == '') {
-						$currently_reading_headers = false;
-					} else {
-						$headers[] = $line;
-					}
-				} else {
-					$data .= fread($this->socket, 4096 * 8);
-				}
-			}
-			
-			$response = new \stdClass;
-			$response->headers = $headers;
-			$response->data = $data;
-			
-			return $response;
+			return $this->response;
 		}
 		
 		/**
@@ -462,7 +443,7 @@
 		 * Convert the lines of response data into an associative array.
 		 *
 		 * @param string $data lines of response data
-		 * @return array associative array
+		 * @return array|string associative array
 		 */
 		private function convertResponse($data)
 		{
