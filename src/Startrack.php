@@ -62,7 +62,7 @@
 			
 //			$this->sendGetRequest('accounts/' . $this->account_number, [], false);
 //			$data = $this->convertResponse($this->getResponse()->data);
-//			$this->closeSocket();
+//			
 			
 			return new Account($data);
 		}
@@ -95,7 +95,6 @@
 		{
 			$this->sendPostRequest('prices/shipments', $input);
 			$data = $this->convertResponse($this->getResponse()->data);
-			$this->closeSocket();
 			
 			if (array_key_exists('errors', $data)) {
 				foreach ($data['errors'] as $error) {
@@ -142,7 +141,7 @@
 		{
 			$this->sendPostRequest('shipments', $input);
 			$data = $this->convertResponse($this->getResponse()->data);
-			$this->closeSocket();
+			
 			
 			if (array_key_exists('errors', $data)) {
 				foreach ($data['errors'] as $error) {
@@ -202,7 +201,7 @@
 			
 			$this->sendPostRequest('labels', $request);
 			$data = $this->convertResponse($this->getResponse()->data);
-			$this->closeSocket();
+			
 			
 			if (array_key_exists('errors', $data)) {
 				foreach ($data['errors'] as $error) {
@@ -234,7 +233,7 @@
 			
 			$this->sendPutRequest('orders', $request);
 			$data = $this->convertResponse($this->getResponse()->data);
-			$this->closeSocket();
+			
 			if (!is_array($data)) {
 				return new Order([
 					'order_id' => 'None',
@@ -253,7 +252,7 @@
 			$this->sendGetRequest('accounts/' . $this->account_number . '/orders/' . $data['order']['order_id'] . '/summary');
 			$data['order']['manifest_pdf'] = $this->getResponse()->data;
 			$summarydata = $this->convertResponse($data['order']['manifest_pdf']);
-			$this->closeSocket();
+			
 			
 			if (is_array($summarydata) && array_key_exists('errors', $summarydata)) {
 				foreach ($summarydata['errors'] as $error) {
@@ -273,7 +272,7 @@
 		{
 			$this->sendDeleteRequest('shipments/' . $shipment_id, null);
 			$data = $this->convertResponse($this->getResponse()->data);
-			$this->closeSocket();
+			
 			
 			if (is_array($data) && array_key_exists('errors', $data)) {
 				foreach ($data['errors'] as $error) {
@@ -328,20 +327,19 @@
 		 */
 		private function buildHttpHeaders($request_type, $action, $content_length = 0, $include_account = false)
 		{
-			$a_headers = array();
-			$a_headers[] = $request_type . ' ' . $this->baseUrl() . $action . ' HTTP/1.1';
-			$a_headers[] = 'Authorization: ' . 'Basic ' . base64_encode($this->api_key . ':' . $this->api_password);
-			$a_headers[] = 'Host: ' . self::API_HOST;
+			$a_headers = [];
+			$a_headers['Authorization'] = 'Basic ' . base64_encode($this->api_key . ':' . $this->api_password);
+			$a_headers['Host'] = self::API_HOST;
 			if ($content_length) {
-				$a_headers[] = 'Content-Type: application/json';
-				$a_headers[] = 'Content-Length: ' . $content_length;
+				$a_headers['Content-Type'] = 'application/json';
+				$a_headers['Content-Length'] = $content_length;
 			}
-			$a_headers[] = 'Accept: */*';
+			$a_headers['Accept'] = '*/*';
 			if ($include_account) {
-				$a_headers[] = 'Account-Number: ' . $this->account_number;
+				$a_headers['Account-Number'] = $this->account_number;
 			}
-			$a_headers[] = 'Cache-Control: no-cache';
-			$a_headers[] = 'Connection: close';
+			$a_headers['Cache-Control'] = 'no-cache';
+			$a_headers['Connection'] = 'close';
 			return $a_headers;
 		}
 		
@@ -409,13 +407,19 @@
 		{
 			$encoded_data = $data ? json_encode($data) : '';
 			
-			$this->createSocket();
+//			$this->createSocket();
 			$headers = $this->buildHttpHeaders($type, $action, strlen($encoded_data), $include_account);
-			$data = $this->client->request($type, $action. $this->account_number,['json'=>$encoded_data,'headers'=>$headers]);
+			
+			try {
+				$data = $this->client->request($type, $action, ['body' => $encoded_data, 'headers' => $headers]);
+			}
+			catch( Exception $e){
+				$e->getMessage();
+			}
 			
 			$response = new \stdClass;
 			$response->headers = $data->getHeaders();
-			$response->data = $data->getBody();
+			$response->data = $data->getBody()->getContents();
 			
 			$this->response = $response;
 		}
