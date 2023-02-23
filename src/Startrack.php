@@ -411,7 +411,7 @@
 			$headers = $this->buildHttpHeaders($type, $action, strlen($encoded_data), $include_account);
 			
 			try {
-				$data = $this->client->request($type, $action, ['body' => $encoded_data, 'headers' => $headers]);
+				$data = $this->client->request($type, $action, ['body' => $encoded_data, 'headers' => $headers, 'synchronous' => true]);
 			}
 			catch( Exception $e){
 				$e->getMessage();
