@@ -102,7 +102,11 @@
 				],
 				'items' => [],
 			];
+			$max_dimension = 0;
 			foreach ($this->parcels as $parcel) {
+				if(max($parcel->length,$parcel->height,$parcel->width)>$max_dimension){
+					$max_dimension = max($parcel->length,$parcel->height,$parcel->width);
+				}
 				$item = [
 					'packaging_type' => 'ITM',
 					'length' => $parcel->length,
@@ -121,7 +125,7 @@
 				}
 				$request['items'][] = $item;
 			}
-			return $this->_startrack->getQuotes(['shipments' => [$request]], $urgent);
+			return $this->_startrack->getQuotes(['shipments' => [$request]], $urgent, $max_dimension);
 		}
 		
 		public function lodgeShipment()

@@ -91,7 +91,7 @@
 		 * @return Quote[]
 		 * @throws Exception
 		 */
-		public function getQuotes($input, $urgent): array
+		public function getQuotes($input, $urgent, $max_dimension): array
 		{
 			$this->sendPostRequest('prices/shipments', $input);
 			$data = $this->convertResponse($this->getResponse()->data);
@@ -109,6 +109,17 @@
 						throw new Exception($error['message']);
 					}
 				}
+				
+				// Oversize items
+				if ($max_dimension >= 100 && in_array($shipment['items'][0]['product_id'], ['FPP', 'PRM'])) {
+					$quotes[$shipment['items'][0]['product_id']] = $shipment['shipment_summary']['total_cost']+15;
+				}
+				if ($max_dimension >= 117 && in_array($shipment['items'][0]['product_id'], ['EXP'])) {
+					$quotes[$shipment['items'][0]['product_id']] = $shipment['shipment_summary']['total_cost']+15;
+				}
+				
+				// Urgent Deliveries
+				
 				if ($urgent && in_array($shipment['items'][0]['product_id'], ['FPP', 'PRM'])) {
 					$quotes[$shipment['items'][0]['product_id']] = $shipment['shipment_summary']['total_cost'];
 				} else if (!$urgent) {
