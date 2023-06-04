@@ -59,7 +59,7 @@
 		{
 			$headers = $this->buildHttpHeaders('GET', 'accounts/');
 			$data = $this->client->request('GET', 'accounts/'. $this->account_number,['headers'=>$headers]);
-			
+
 //			$this->sendGetRequest('accounts/' . $this->account_number, [], false);
 //			$data = $this->convertResponse($this->getResponse()->data);
 //			
@@ -112,10 +112,10 @@
 				
 				// Oversize items
 				if ($max_dimension >= 100 && in_array($shipment['items'][0]['product_id'], ['FPP', 'PRM'])) {
-					$quotes[$shipment['items'][0]['product_id']] = $shipment['shipment_summary']['total_cost']+15;
+					$shipment['shipment_summary']['total_cost'] = $shipment['shipment_summary']['total_cost']+15;
 				}
 				if ($max_dimension >= 117 && in_array($shipment['items'][0]['product_id'], ['EXP'])) {
-					$quotes[$shipment['items'][0]['product_id']] = $shipment['shipment_summary']['total_cost']+15;
+					$shipment['shipment_summary']['total_cost'] = $shipment['shipment_summary']['total_cost']+15;
 				}
 				
 				// Urgent Deliveries
@@ -417,7 +417,7 @@
 		private function sendRequest($action, $data, $type, $include_account = true)
 		{
 			$encoded_data = $data ? json_encode($data) : '';
-			
+
 //			$this->createSocket();
 			$headers = $this->buildHttpHeaders($type, $action, strlen($encoded_data), $include_account);
 			

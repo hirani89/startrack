@@ -125,7 +125,7 @@
 				}
 				$request['items'][] = $item;
 			}
-			return $this->_startrack->getQuotes(['shipments' => [$request]], $urgent, $max_dimension);
+			return $this->_startrack->getQuotes(['shipments' => [$request]], $urgent, (int)$max_dimension);
 		}
 		
 		public function lodgeShipment()
