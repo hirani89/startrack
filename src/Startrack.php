@@ -112,10 +112,10 @@
 				
 				// Oversize items
 				if ($max_dimension >= 100 && in_array($shipment['items'][0]['product_id'], ['FPP', 'PRM'])) {
-					$shipment['shipment_summary']['total_cost'] = $shipment['shipment_summary']['total_cost']+15;
+					$shipment['shipment_summary']['total_cost'] = $shipment['shipment_summary']['total_cost']+30;
 				}
 				if ($max_dimension >= 117 && in_array($shipment['items'][0]['product_id'], ['EXP'])) {
-					$shipment['shipment_summary']['total_cost'] = $shipment['shipment_summary']['total_cost']+15;
+					$shipment['shipment_summary']['total_cost'] = $shipment['shipment_summary']['total_cost']+30;
 				}
 				
 				// Urgent Deliveries
